@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xml
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <bean id="hello" class="first.common.quartz.Hello" />
+
+	<!-- Job과 Job 속성 및 파라미터 정보를 모아놓은 컴포넌트 -->
+  <bean name="myJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean"
+        p:jobClass="first.common.quartz.spring.MyJobBean"
+        p:durability="true">
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="hello" value-ref="hello" />
+      </map>
+    </property>
+  </bean>
+
+	<!-- Job 실행 시작, 주기등을 설정하는 컴포넌트. -->
+  <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"
+        p:jobDetail-ref="myJob"
+        p:startDelay="1000"
+        p:cronExpression="0/5 * * * * ?" />
+        <!-- p:cronExpression="0 50 9 * * ? -->
+
+
+	<!-- 모든 Job 설정 정보를 갖고 Manager Thread를 생성해서 해당 시간에 Job을 실행하는 컴포넌트 -->
+  <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <property name="triggers">
+      <list>
+        <ref bean="cronTrigger" />
+      </list>
+    </property>
+  </bean>
+</beans>
